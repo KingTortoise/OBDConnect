@@ -6,6 +6,19 @@
   <groupId>com.kingtortoise.obdconnect</groupId>
   <artifactId>connect</artifactId>
   <version>1.0</version>
+     <repositories>
+    <repository>
+        <id>google</id>
+        <name>Google Maven Repository</name>
+        <url>https://maven.google.com</url>
+    </repository>
+    <!-- 保留中央仓库 -->
+    <repository>
+        <id>central</id>
+        <name>Central Repository</name>
+        <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
+</repositories>
   <dependencies>
     <dependency>
       <groupId>androidx.core</groupId>
