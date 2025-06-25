@@ -13,6 +13,25 @@
         <url>https://maven.google.com</url>
     </repository>
   </repositories>
+     <dependencyManagement>
+    <dependencies>
+        <!-- 使用 AndroidX BOM -->
+        <dependency>
+            <groupId>androidx</groupId>
+            <artifactId>androidx-bom</artifactId>
+            <version>2023.12.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        
+        <!-- 显式覆盖冲突的 Lifecycle 版本 -->
+        <dependency>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-common</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>androidx.core</groupId>
