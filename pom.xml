@@ -20,31 +20,6 @@
         <url>https://repo1.maven.org/maven2</url>
     </repository>
     </repositories>
-
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>androidx.lifecycle</groupId>
-            <artifactId>lifecycle-common</artifactId>
-            <version>2.6.2</version>
-        </dependency>
-         <dependency>
-            <groupId>androidx.lifecycle</groupId>
-            <artifactId>lifecycle-runtime</artifactId>
-            <version>2.6.2</version>
-        </dependency>
-         <dependency>
-            <groupId>androidx.lifecycle</groupId>
-            <artifactId>lifecycle-viewmodel</artifactId>
-            <version>2.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>androidx.lifecycle</groupId>
-            <artifactId>lifecycle-runtime-ktx</artifactId>
-            <version>2.6.2</version>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
      
   <dependencies>
     <dependency>
@@ -52,15 +27,67 @@
       <artifactId>core-ktx</artifactId>
       <version>1.13.1</version>
       <scope>runtime</scope>
-         <type>aar</type>
+      <type>aar</type>
+      <exclusions>
+        <exclusion>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-common</artifactId>
+        </exclusion>
+           <exclusion>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-runtime</artifactId>
+           </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>androidx.activity</groupId>
       <artifactId>activity-ktx</artifactId>
       <version>1.9.0</version>
       <scope>runtime</scope>
-         <type>aar</type>
+      <type>aar</type>
+         <exclusions>
+        <exclusion>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-common</artifactId>
+        </exclusion>
+           <exclusion>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-runtime</artifactId>
+           </exclusion>
+              <exclusion>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-viewmodel</artifactId>
+           </exclusion>
+              <exclusion>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-runtime-ktx</artifactId>
+           </exclusion>
+      </exclusions>
     </dependency>
+       <dependency>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-common</artifactId>
+            <version>2.6.2</version>
+            <type>aar</type>
+        </dependency>
+       <dependency>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-runtime</artifactId>
+            <version>2.6.2</version>
+            <type>aar</type>
+        </dependency>
+       <dependency>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-viewmodel</artifactId>
+            <version>2.6.2</version>
+            <type>aar</type>
+        </dependency>
+        <dependency>
+            <groupId>androidx.lifecycle</groupId>
+            <artifactId>lifecycle-runtime-ktx</artifactId>
+            <version>2.6.2</version>
+             <type>aar</type>
+        </dependency>
   </dependencies>
 
 <build>
