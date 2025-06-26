@@ -35,11 +35,13 @@
       <groupId>androidx.core</groupId>
       <artifactId>core-ktx</artifactId>
       <version>1.13.1</version>
+      <type>aar</type>
     </dependency>
     <dependency>
       <groupId>androidx.activity</groupId>
       <artifactId>activity-ktx</artifactId>
          <version>1.9.0</version>
+         <type>aar</type>
     </dependency>
   </dependencies>
 </project>
