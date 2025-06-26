@@ -96,6 +96,14 @@
             <artifactId>android-maven-plugin</artifactId>
             <version>4.1.0</version>
             <extensions>true</extensions>
+             <configuration>
+                    <!-- 指定 AndroidManifest.xml 路径 -->
+                    <androidManifestFile>${project.basedir}/src/main/AndroidManifest.xml</androidManifestFile>
+                    <sdk>
+                        <platform>33</platform>
+                    </sdk>
+                    <undeployBeforeDeploy>true</undeployBeforeDeploy>
+                </configuration>
         </plugin>
     </plugins>
 </build>
