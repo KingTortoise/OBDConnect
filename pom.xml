@@ -99,6 +99,9 @@
              <configuration>
                     <!-- 指定 AndroidManifest.xml 路径 -->
                     <androidManifestFile>AndroidManifest.xml</androidManifestFile>
+                  <sdk>
+                    <platform>24</platform>
+                </sdk>
                 </configuration>
         </plugin>
     </plugins>
