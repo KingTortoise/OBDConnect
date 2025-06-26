@@ -98,7 +98,7 @@
             <extensions>true</extensions>
              <configuration>
                     <!-- 指定 AndroidManifest.xml 路径 -->
-                    <androidManifestFile>${project.basedir}/src/main/AndroidManifest.xml</androidManifestFile>
+                    <androidManifestFile>AndroidManifest.xml</androidManifestFile>
                     <sdk>
                         <platform>33</platform>
                     </sdk>
