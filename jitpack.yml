@@ -1,1 +1,10 @@
-mvn install:install-file -Dfile=connect-release.aar -DgroupId=com.kingtortoise.obdconnect -DartifactId=connect -Dversion=1.0.0 -Dpackaging=aar -DpomFile=pom.xml -DgeneratePom=false
+# jitpack.yml
+before_install:
+  # 更新 SDK 工具
+  - yes | sdkmanager --update
+  # 安装缺失的 Android SDK Platform 24
+  - yes | sdkmanager "platforms;android-24"
+  
+install:
+  # 执行 Maven 命令，使用已安装的 SDK
+  - mvn install:install-file -Dfile=connect-release.aar -DgroupId=com.kingtortoise.obdconnect -DartifactId=connect -Dversion=1.0.0 -Dpackaging=aar -DpomFile=pom.xml -DgeneratePom=false 
