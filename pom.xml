@@ -7,13 +7,17 @@
   <artifactId>connect</artifactId>
   <version>1.0</version>
   <packaging>aar</packaging>
+     
   <repositories>
-    <repository>
-        <id>google</id>
-        <name>Google Maven Repository</name>
-        <url>https://maven.google.com</url>
-    </repository>
-  </repositories>
+        <repository>
+            <id>google</id>
+            <url>https://dl.google.com/dl/android/maven2</url>
+        </repository>
+        <repository>
+            <id>mavenCentral</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+    </repositories>
   <dependencyManagement>
     <dependencies>
         <dependency>
