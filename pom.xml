@@ -99,10 +99,6 @@
              <configuration>
                     <!-- 指定 AndroidManifest.xml 路径 -->
                     <androidManifestFile>AndroidManifest.xml</androidManifestFile>
-                    <sdk>
-                        <platform>33</platform>
-                    </sdk>
-                    <undeployBeforeDeploy>true</undeployBeforeDeploy>
                 </configuration>
         </plugin>
     </plugins>
