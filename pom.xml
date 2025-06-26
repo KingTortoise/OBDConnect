@@ -9,14 +9,10 @@
   <packaging>aar</packaging>
      
   <repositories>
-       <repository>
-        <id>central</id>
-        <name>Maven Central Repository</name>
-        <url>https://repo.maven.apache.org/maven2</url>
-    </repository>
         <repository>
-            <id>mavenCentral</id>
-            <url>https://repo.maven.apache.org/maven2</url>
+            <id>google</id>
+            <name>Google Maven Repository</name>
+            <url>https://maven.google.com</url>
         </repository>
     </repositories>
      
@@ -26,18 +22,21 @@
       <artifactId>kotlin-stdlib-jdk8</artifactId>
       <version>1.9.0</version>
       <scope>compile</scope>
+         <type>aar</type>
     </dependency>
     <dependency>
       <groupId>androidx.core</groupId>
       <artifactId>core-ktx</artifactId>
       <version>1.13.1</version>
       <scope>runtime</scope>
+         <type>aar</type>
     </dependency>
     <dependency>
       <groupId>androidx.activity</groupId>
       <artifactId>activity-ktx</artifactId>
       <version>1.9.0</version>
       <scope>runtime</scope>
+         <type>aar</type>
     </dependency>
   </dependencies>
 
