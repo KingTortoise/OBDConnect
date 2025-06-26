@@ -100,7 +100,7 @@
                     <!-- 指定 AndroidManifest.xml 路径 -->
                     <androidManifestFile>AndroidManifest.xml</androidManifestFile>
                   <sdk>
-                    <platform>24</platform>
+                    <platform>33</platform>
                 </sdk>
                 </configuration>
         </plugin>
