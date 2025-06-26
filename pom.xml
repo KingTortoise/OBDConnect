@@ -38,6 +38,6 @@
     <dependency>
       <groupId>androidx.activity</groupId>
       <artifactId>activity-ktx</artifactId>
-    </dependency
+    </dependency>
   </dependencies>
 </project>
