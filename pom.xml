@@ -20,13 +20,13 @@
 
      <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>androidx</groupId>
-                <artifactId>androidx-bom</artifactId>
-                <version>2025.0.0</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+          <dependency>
+           <groupId>androidx.compose</groupId>
+           <artifactId>compose-bom</artifactId>
+           <version>2025.05.00</version>
+           <type>pom</type>
+           <scope>runtime</scope>
+           </dependency>
         </dependencies>
     </dependencyManagement>
      
