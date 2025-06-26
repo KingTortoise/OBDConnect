@@ -30,12 +30,6 @@
       <artifactId>activity-ktx</artifactId>
       <version>1.9.0</version>
       <type>aar</type>
-     <exclusions>
-       <exclusion>
-          <groupId>androidx.lifecycle</groupId>
-          <artifactId>lifecycle-common</artifactId>
-     </exclusion>
-    </exclusions>
     </dependency>
   </dependencies>
 </project>
