@@ -1,2 +1,1 @@
-FILE="-Dfile=connect-release.aar" 
-mvn install:install-file $FILE -DgroupId=com.kingtortoise.obdconnect -DartifactId=connect -Dversion=1.0.0 -Dpackaging=aar -DpomFile=pom.xml
+mvn install:install-file -Dfile=connect-release.aar -DgroupId=com.kingtortoise.obdconnect -DartifactId=connect -Dversion=1.0.0 -Dpackaging=aar -DpomFile=pom.xml -DgeneratePom=false
