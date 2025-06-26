@@ -6,6 +6,7 @@
   <groupId>com.kingtortoise.obdconnect</groupId>
   <artifactId>connect</artifactId>
   <version>1.0</version>
+  <packaging>aar</packaging>
      
   <repositories>
         <repository>
