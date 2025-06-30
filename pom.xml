@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.kingtortoise.obdconnect</groupId>
   <artifactId>connect</artifactId>
-  <version>1.0</version>
+  <version>1.0.0</version>
   <packaging>aar</packaging>
      
   <repositories>
@@ -98,9 +98,6 @@
             <extensions>true</extensions>
              <configuration>
                 <androidManifestFile>AndroidManifest.xml</androidManifestFile>
-                <sdk>
-                    <platform>24</platform>
-                </sdk>
             </configuration>
         </plugin>
     </plugins>
