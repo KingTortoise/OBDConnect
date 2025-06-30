@@ -2,8 +2,8 @@
 before_install:
   # 更新 SDK 工具
   - yes | sdkmanager --update
-  # 安装缺失的 Android SDK Platform 24
-  - yes | sdkmanager "platforms;android-24"
+  # 安装缺失的 Android SDK Platform 21
+  - yes | sdkmanager "platforms;android-21"
   
 install:
   # 执行 Maven 命令，使用已安装的 SDK
