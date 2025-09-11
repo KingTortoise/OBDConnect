@@ -1,206 +1,497 @@
-[README.md](https://github.com/user-attachments/files/22231176/README.md)
-### ConnectManager README
+[README.md](https://github.com/user-attachments/files/22269875/README.md)
+# Bluetooth & BLE Connection Manager
 
-This library provides connection management for Classic Bluetooth, BLE, and Wi‑Fi, exposing friendly Java/Kotlin APIs (CompletableFuture and stream-like subscriptions).
+A comprehensive Android library for managing Bluetooth Classic, BLE, and Wi-Fi connections with friendly Java/Kotlin APIs using CompletableFuture and stream-like subscriptions.
 
-- Package: `com.btBleTcp.connect`
-- Core object: `ConnectManager` (Kotlin object; from Java call via `ConnectManager.INSTANCE`)
-- Connection types: `ConnectType` (`WIFI(0) / BT(1) / BLE(2)`)
+## Features
+
+- **Multi-Protocol Support**: Bluetooth Classic, BLE, and Wi-Fi connections
+- **Modern APIs**: CompletableFuture-based asynchronous operations
+- **Stream Subscriptions**: Real-time data flow with reactive programming
+- **Permission Management**: Automated runtime permission handling
+- **Cross-Platform**: Works with both Java and Kotlin
+- **Thread-Safe**: All operations properly handle threading
+
+## Package Information
+
+- **Package**: `com.btBleTcp.connect`
+- **Core Classes**: 
+  - `ConnectManager` (Kotlin object; access via `ConnectManager.INSTANCE` from Java)
+  - `BluetoothPermissionManager` (Kotlin class)
+- **Connection Types**: `ConnectType` enum (`WIFI(0)`, `BT(1)`, `BLE(2)`)
 
 ## Integration
-- Put `connect-debug.aar` under `app/libs/`
-- In `app/build.gradle` add:
+
+### 1. Add the Library
+
+Place the `connect-debug.aar` file under `app/libs/` and add to your `app/build.gradle`:
+
 ```gradle
-implementation files('libs/connect-debug.aar')
-```
-
-## Permissions
-Android 12+ requires runtime permissions. Recommended manifest entries:
-```xml
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.BLUETOOTH" />
-<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-<uses-permission android:name="android.permission.BLUETOOTH_SCAN" tools:targetApi="31" />
-<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" tools:targetApi="31" />
-```
-
-Use `BluetoothPermissionManager` (provided by the library) on a `ComponentActivity` to request permissions:
-```java
-BluetoothPermissionManager pm = new BluetoothPermissionManager(this);
-pm.checkAndRequestPermissionsWithCallback(
-  () -> { /* granted */ },
-  deniedList -> { /* denied */ }
-);
-```
-
-## Initialization
-```java
-ConnectManager.INSTANCE.initManagerJava(ConnectType.BLE.getValue(), context)
-  .thenAccept(ctx -> { /* ctx may be null */ })
-  .exceptionally(e -> { /* handle error */ return null; });
-```
-
-- Re-initializing with a different type will auto close the previous port and create a new one.
-- On success, `ConnectManager.globalContext` holds the current context and `port`.
-
-## Scan and device stream
-- Start scan (one-shot completion):
-```java
-ConnectManager.INSTANCE.startScanJava()
-  .thenAccept(u -> { /* scan started */ });
-```
-- Subscribe device stream (continuous; returns `Set<BluetoothDevice>`):
-```java
-AutoCloseable sub = ConnectManager.INSTANCE.observeDeviceFlowJava(
-  devices -> { /* update UI */ },
-  error -> { /* handle error */ }
-);
-// later
-sub.close();
-```
-
-## Connect / Reconnect / Close
-- Connect by name or MAC address (MAC is recommended):
-```java
-ConnectManager.INSTANCE.connectJava(deviceAddress, context)
-  .thenAccept(success -> { /* true when connected */ });
-```
-- Reconnect based on existing `globalContext.port`:
-```java
-ConnectManager.INSTANCE.reconnectJava()
-  .thenAccept(success -> { /* true/false */ });
-```
-- Close connection:
-```java
-ConnectManager.INSTANCE.closeJava()
-  .thenAccept(code -> { /* 0 = success, otherwise failure */ });
-```
-
-## Send and Receive
-- Write (timeout in ms):
-```java
-ConnectManager.INSTANCE.writeJava(data, 3000L)
-  .thenAccept(success -> { /* true when sent */ });
-```
-- Read once (Future of one response, timeout in ms):
-```java
-ConnectManager.INSTANCE.readJava(3000L)
-  .thenAccept(bytes -> { /* may be null */ });
-```
-- Subscribe continuous receive stream (`ByteArray`):
-```java
-AutoCloseable recv = ConnectManager.INSTANCE.receiveDataFlowJava(
-  bytes -> { /* show message */ },
-  error -> { /* handle error */ }
-);
-// later
-recv.close();
-```
-
-## BLE device info
-- Valid in BLE mode only:
-```java
-ConnectManager.INSTANCE.getBleDeviceInfoJava()
-  .thenAccept(info -> { /* may be null */ });
-```
-
-## Global callbacks (optional)
-These callbacks are synced to the current `port` when set:
-```kotlin
-ConnectManager.onDeviceDisconnect = { /* device disconnected */ }
-ConnectManager.onBluetoothDisconnect = { /* bluetooth disabled/disconnected */ }
-ConnectManager.onHandleRssiUpdate = { rssi -> /* RSSI update */ }
-```
-
-## Error handling and threading
-- All `*Java()` methods run work on IO and complete the `Future` on Main.
-- Add `.exceptionally(...)` to handle errors; consider `.orTimeout(...)` to avoid hanging chains.
-
-## Minimal Java walkthrough
-```java
-// 1) Permissions
-BluetoothPermissionManager pm = new BluetoothPermissionManager(this);
-pm.checkAndRequestPermissionsWithCallback(
-  () -> {
-    // 2) Init
-    ConnectManager.INSTANCE.initManagerJava(ConnectType.BLE.getValue(), getApplicationContext())
-      // 3) Start scan
-      .thenCompose(ctx -> ConnectManager.INSTANCE.startScanJava())
-      // 4) Subscribe devices
-      .thenAccept(u -> {
-        AutoCloseable deviceSub = ConnectManager.INSTANCE.observeDeviceFlowJava(
-          devices -> {
-            // update UI; on click -> 5) connect
-          },
-          error -> { /* show error */ }
-        );
-      });
-  },
-  denied -> { /* show denied */ }
-);
-
-// 5) Connect (prefer MAC address)
-ConnectManager.INSTANCE.connectJava(deviceAddress, getApplicationContext())
-  .thenAccept(success -> { /* go to communication page */ });
-
-// 6) Send/Receive
-ConnectManager.INSTANCE.writeJava("hello\r\n".getBytes(StandardCharsets.UTF_8), 3000L);
-AutoCloseable recvSub = ConnectManager.INSTANCE.receiveDataFlowJava(
-  bytes -> { /* show */ },
-  error -> { /* show */ }
-);
-
-// 7) Reconnect/Close
-ConnectManager.INSTANCE.reconnectJava();
-ConnectManager.INSTANCE.closeJava();
-```
-
-## FAQ
-- No callback in `thenCompose/thenAccept`: usually missing runtime permissions, Bluetooth off, or `initManager` returned null. Add `.orTimeout(...)` and logs to locate the stage.
-- Reconnect failed with `Max reconnection attempts reached`: fall back to a full `connectJava(address, context)`.
-- Device name may be null: prefer `device.getAddress()` for identity, guard `getName()` with null checks.
-
-## Kotlin quick start
-```kotlin
-class MainActivity : ComponentActivity() {
-  private lateinit var pm: BluetoothPermissionManager
-  private var deviceSub: AutoCloseable? = null
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    pm = BluetoothPermissionManager(this)
-
-    pm.checkAndRequestPermissionsWithCallback(
-      Runnable {
-        ConnectManager.initManager(ConnectType.BLE.value, applicationContext)
-        ConnectManager.startScanJava()
-          .thenAccept {
-            deviceSub?.close()
-            deviceSub = ConnectManager.observeDeviceFlowJava(
-              { devices ->
-                // update UI list
-              },
-              { error -> /* show error */ }
-            )
-          }
-      },
-      java.util.function.Consumer { denied -> /* show denied */ }
-    )
-  }
-
-  override fun onDestroy() {
-    deviceSub?.close()
-    super.onDestroy()
-  }
+dependencies {
+    implementation files('libs/connect-debug.aar')
 }
 ```
 
-## Android 12/13 (API 31/33) notes
-- Request runtime permissions at usage time:
-  - Android 12+: `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`
-  - Android 6–11: `ACCESS_FINE_LOCATION` for BLE scan
-- Declare bluetooth permissions in Manifest as shown above. For Android 12+, keep `tools:targetApi="31"` to avoid install-time warnings.
-- Ensure Bluetooth and Location are enabled when scanning for BLE devices (system requirement for BLE scanning visibility).
-- Consider adding a user-facing rationale before permission requests for better acceptance.
+### 2. Required Permissions
 
+Add these permissions to your `AndroidManifest.xml`:
 
+```xml
+<!-- Basic Bluetooth permissions -->
+<uses-permission android:name="android.permission.BLUETOOTH" />
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+<!-- Location permissions for BLE scanning (Android 6.0+) -->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+<!-- New Bluetooth permissions (Android 12+) -->
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" 
+    tools:targetApi="31" />
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" 
+    tools:targetApi="31" />
+```
+
+## BluetoothPermissionManager
+
+The `BluetoothPermissionManager` class handles all Bluetooth-related runtime permissions automatically based on the Android version.
+
+### Basic Usage
+
+```java
+// Initialize the permission manager
+BluetoothPermissionManager permissionManager = new BluetoothPermissionManager(this);
+
+// Request permissions with callbacks
+permissionManager.checkAndRequestPermissionsWithCallback(
+    () -> {
+        // All permissions granted - proceed with Bluetooth operations
+        Toast.makeText(this, "Permissions granted", Toast.LENGTH_SHORT).show();
+    },
+    deniedPermissions -> {
+        // Some permissions denied - show user message
+        Toast.makeText(this, "Permissions denied: " + deniedPermissions, Toast.LENGTH_LONG).show();
+    }
+);
+```
+
+### Advanced Methods
+
+```java
+// Check if all required permissions are already granted (without requesting)
+boolean hasAllPermissions = permissionManager.hasAllRequiredPermissions();
+
+// Get list of required permissions for current Android version
+List<String> requiredPermissions = permissionManager.getRequiredPermissions();
+
+// Check Android 8+ specific permissions
+boolean hasAndroid8Permissions = permissionManager.checkAndroid8Permissions();
+```
+
+### Permission Requirements by Android Version
+
+- **Android 12+ (API 31+)**: `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`
+- **Android 8+ (API 26+)**: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`
+- **Android 6+ (API 23+)**: `ACCESS_FINE_LOCATION`
+- **Android 5 and below**: No runtime permissions required
+
+## ConnectManager
+
+The `ConnectManager` is the core class for all connection operations. It's implemented as a Kotlin object, so from Java you access it via `ConnectManager.INSTANCE`.
+
+### Initialization
+
+```java
+// Initialize with connection type and context
+ConnectManager.INSTANCE.initManagerJava(ConnectType.BLE.getValue(), getApplicationContext())
+    .thenAccept(context -> {
+        // Initialization successful
+        // context may be null - this is normal
+    })
+    .exceptionally(throwable -> {
+        // Handle initialization error
+        Log.e("ConnectManager", "Initialization failed", throwable);
+        return null;
+    });
+```
+
+**Note**: Re-initializing with a different connection type will automatically close the previous connection and create a new one.
+
+### Device Discovery
+
+#### Start Scanning
+
+```java
+// Start device discovery
+ConnectManager.INSTANCE.startScanJava()
+    .thenAccept(unused -> {
+        // Scan started successfully
+        Toast.makeText(this, "Scan started", Toast.LENGTH_SHORT).show();
+    })
+    .exceptionally(throwable -> {
+        // Handle scan start error
+        return null;
+    });
+```
+
+#### Subscribe to Device Stream
+
+```java
+// Subscribe to continuous device updates
+AutoCloseable deviceSubscription = ConnectManager.INSTANCE.observeDeviceFlowJava(
+    devices -> {
+        // Update UI with discovered devices
+        Set<BluetoothDevice> deviceSet = (Set<BluetoothDevice>) devices;
+        for (BluetoothDevice device : deviceSet) {
+            String deviceInfo = device.getName() + " (" + device.getAddress() + ")";
+            // Add to your device list
+        }
+    },
+    error -> {
+        // Handle device stream error
+        Log.e("DeviceStream", "Error in device stream", error);
+    }
+);
+
+// Don't forget to close the subscription
+deviceSubscription.close();
+```
+
+### Connection Management
+
+#### Connect to Device
+
+```java
+// Connect using device address (recommended) or name
+String deviceAddress = "AA:BB:CC:DD:EE:FF"; // MAC address preferred
+ConnectManager.INSTANCE.connectJava(deviceAddress, getApplicationContext())
+    .thenAccept(success -> {
+        if (Boolean.TRUE.equals(success)) {
+            // Connection successful
+            Toast.makeText(this, "Connected successfully", Toast.LENGTH_SHORT).show();
+        } else {
+            // Connection failed
+            Toast.makeText(this, "Connection failed", Toast.LENGTH_SHORT).show();
+        }
+    })
+    .exceptionally(throwable -> {
+        // Handle connection error
+        Log.e("Connection", "Connection error", throwable);
+        return null;
+    });
+```
+
+#### Reconnect
+
+```java
+// Reconnect using existing connection context
+ConnectManager.INSTANCE.reconnectJava()
+    .thenAccept(success -> {
+        if (Boolean.TRUE.equals(success)) {
+            Toast.makeText(this, "Reconnected successfully", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Reconnection failed", Toast.LENGTH_SHORT).show();
+        }
+    });
+```
+
+#### Close Connection
+
+```java
+// Close the current connection
+ConnectManager.INSTANCE.closeJava()
+    .thenAccept(resultCode -> {
+        if (resultCode == 0) {
+            Toast.makeText(this, "Connection closed", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Close failed with code: " + resultCode, Toast.LENGTH_SHORT).show();
+        }
+    });
+```
+
+### Data Communication
+
+#### Send Data
+
+```java
+// Send data with timeout
+String message = "Hello, Device!\r\n";
+byte[] data = message.getBytes(StandardCharsets.UTF_8);
+
+ConnectManager.INSTANCE.writeJava(data, 3000L) // 3 second timeout
+    .thenAccept(success -> {
+        if (Boolean.TRUE.equals(success)) {
+            Toast.makeText(this, "Data sent successfully", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Failed to send data", Toast.LENGTH_SHORT).show();
+        }
+    })
+    .exceptionally(throwable -> {
+        Log.e("SendData", "Send error", throwable);
+        return null;
+    });
+```
+
+#### Receive Data (One-time)
+
+```java
+// Read data once with timeout
+ConnectManager.INSTANCE.readJava(5000L) // 5 second timeout
+    .thenAccept(receivedData -> {
+        if (receivedData != null && receivedData.length > 0) {
+            String message = new String(receivedData, StandardCharsets.UTF_8);
+            Toast.makeText(this, "Received: " + message, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "No data received", Toast.LENGTH_SHORT).show();
+        }
+    });
+```
+
+#### Subscribe to Continuous Data Stream
+
+```java
+// Subscribe to continuous data reception
+AutoCloseable dataSubscription = ConnectManager.INSTANCE.receiveDataFlowJava(
+    receivedData -> {
+        if (receivedData != null && receivedData.length > 0) {
+            String message = new String(receivedData, StandardCharsets.UTF_8);
+            // Process received data
+            runOnUiThread(() -> {
+                // Update UI with received data
+                textView.append("Received: " + message + "\n");
+            });
+        }
+    },
+    error -> {
+        Log.e("DataStream", "Error in data stream", error);
+        runOnUiThread(() -> {
+            Toast.makeText(this, "Data stream error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+        });
+    }
+);
+
+// Close subscription when done
+dataSubscription.close();
+```
+
+### BLE Device Information
+
+```java
+// Get BLE device information (BLE mode only)
+ConnectManager.INSTANCE.getBleDeviceInfoJava()
+    .thenAccept(deviceInfo -> {
+        if (deviceInfo != null) {
+            // Process device information
+            String info = "BLE Device Info: " + deviceInfo.toString();
+            Toast.makeText(this, "Device info retrieved", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "No device info available", Toast.LENGTH_SHORT).show();
+        }
+    });
+```
+
+### Global Callbacks (Optional)
+
+Set global callbacks for connection events:
+
+```kotlin
+// In Kotlin
+ConnectManager.onDeviceDisconnect = { 
+    // Device disconnected
+}
+
+ConnectManager.onBluetoothDisconnect = { 
+    // Bluetooth disabled/disconnected
+}
+
+ConnectManager.onHandleRssiUpdate = { rssi -> 
+    // RSSI update received
+}
+```
+
+## Complete Example
+
+Here's a complete example showing the typical workflow:
+
+```java
+public class MainActivity extends AppCompatActivity {
+    
+    private BluetoothPermissionManager permissionManager;
+    private AutoCloseable deviceSubscription;
+    private AutoCloseable dataSubscription;
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        
+        // Initialize permission manager
+        permissionManager = new BluetoothPermissionManager(this);
+        
+        // Request permissions and start Bluetooth operations
+        permissionManager.checkAndRequestPermissionsWithCallback(
+            this::startBluetoothOperations,
+            this::handlePermissionDenied
+        );
+    }
+    
+    private void startBluetoothOperations() {
+        // 1. Initialize connection manager
+        ConnectManager.INSTANCE.initManagerJava(ConnectType.BLE.getValue(), getApplicationContext())
+            // 2. Start scanning
+            .thenCompose(ctx -> ConnectManager.INSTANCE.startScanJava())
+            // 3. Subscribe to device stream
+            .thenAccept(u -> {
+                deviceSubscription = ConnectManager.INSTANCE.observeDeviceFlowJava(
+                    this::updateDeviceList,
+                    this::handleDeviceStreamError
+                );
+            })
+            .exceptionally(this::handleInitializationError);
+    }
+    
+    private void connectToDevice(String deviceAddress) {
+        ConnectManager.INSTANCE.connectJava(deviceAddress, getApplicationContext())
+            .thenAccept(success -> {
+                if (Boolean.TRUE.equals(success)) {
+                    // Start data reception
+                    startDataReception();
+                    // Navigate to communication activity
+                    startActivity(new Intent(this, CommunicationActivity.class));
+                }
+            });
+    }
+    
+    private void startDataReception() {
+        dataSubscription = ConnectManager.INSTANCE.receiveDataFlowJava(
+            this::processReceivedData,
+            this::handleDataStreamError
+        );
+    }
+    
+    private void processReceivedData(byte[] data) {
+        if (data != null && data.length > 0) {
+            String message = new String(data, StandardCharsets.UTF_8);
+            runOnUiThread(() -> {
+                // Update UI with received data
+            });
+        }
+    }
+    
+    private void sendData(String message) {
+        byte[] data = (message + "\r\n").getBytes(StandardCharsets.UTF_8);
+        ConnectManager.INSTANCE.writeJava(data, 3000L)
+            .thenAccept(success -> {
+                if (Boolean.TRUE.equals(success)) {
+                    Toast.makeText(this, "Data sent", Toast.LENGTH_SHORT).show();
+                }
+            });
+    }
+    
+    @Override
+    protected void onDestroy() {
+        // Clean up subscriptions
+        if (deviceSubscription != null) {
+            try { deviceSubscription.close(); } catch (Exception ignored) {}
+        }
+        if (dataSubscription != null) {
+            try { dataSubscription.close(); } catch (Exception ignored) {}
+        }
+        super.onDestroy();
+    }
+    
+    // Error handling methods
+    private void handlePermissionDenied(List<String> deniedPermissions) {
+        Toast.makeText(this, "Permissions denied: " + deniedPermissions, Toast.LENGTH_LONG).show();
+    }
+    
+    private Void handleInitializationError(Throwable throwable) {
+        runOnUiThread(() -> {
+            Toast.makeText(this, "Initialization failed: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+        });
+        return null;
+    }
+    
+    private void handleDeviceStreamError(Throwable error) {
+        runOnUiThread(() -> {
+            Toast.makeText(this, "Device stream error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+        });
+    }
+    
+    private void handleDataStreamError(Throwable error) {
+        runOnUiThread(() -> {
+            Toast.makeText(this, "Data stream error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+        });
+    }
+}
+```
+
+## Threading and Error Handling
+
+### Threading Model
+
+- All `*Java()` methods execute work on background threads (IO)
+- CompletableFuture callbacks complete on the main thread
+- Always use `runOnUiThread()` when updating UI from callbacks
+
+### Error Handling Best Practices
+
+```java
+// Always add error handling
+ConnectManager.INSTANCE.someMethod()
+    .thenAccept(result -> {
+        // Handle success
+    })
+    .exceptionally(throwable -> {
+        // Handle error
+        Log.e("TAG", "Operation failed", throwable);
+        return null;
+    })
+    .orTimeout(10, TimeUnit.SECONDS); // Add timeout to prevent hanging
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **No callbacks in `thenCompose/thenAccept`**:
+   - Check if runtime permissions are granted
+   - Verify Bluetooth is enabled
+   - Ensure `initManager` didn't return null
+   - Add `.orTimeout(...)` and logs to identify the issue
+
+2. **Reconnect fails with "Max reconnection attempts reached"**:
+   - Fall back to a full `connectJava(address, context)` call
+   - Check if the device is still available
+
+3. **Device name is null**:
+   - Prefer `device.getAddress()` for device identification
+   - Always guard `device.getName()` with null checks
+
+4. **Permission issues on Android 12+**:
+   - Ensure `BLUETOOTH_SCAN` and `BLUETOOTH_CONNECT` permissions are declared
+   - Use `BluetoothPermissionManager` for proper permission handling
+
+### Debug Tips
+
+- Enable Bluetooth logs in Android Studio
+- Use `adb logcat` to monitor system Bluetooth logs
+- Test on different Android versions
+- Verify device compatibility
+
+## Best Practices
+
+1. **Always close subscriptions** in `onDestroy()` or when no longer needed
+2. **Use MAC addresses** instead of device names for connections
+3. **Handle null values** from device information methods
+4. **Add timeouts** to prevent hanging operations
+5. **Test permission flows** on different Android versions
+6. **Use proper error handling** for all async operations
+
+## License
+
+This library is provided as-is for development and testing purposes.
+
+## Support
+
+For issues and questions, please refer to the library documentation or contact the development team.
