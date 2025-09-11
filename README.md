@@ -64,16 +64,7 @@ boolean hasAllPermissions = permissionManager.hasAllRequiredPermissions();
 // Get list of required permissions for current Android version
 List<String> requiredPermissions = permissionManager.getRequiredPermissions();
 
-// Check Android 8+ specific permissions
-boolean hasAndroid8Permissions = permissionManager.checkAndroid8Permissions();
 ```
-
-### Permission Requirements by Android Version
-
-- **Android 12+ (API 31+)**: `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`
-- **Android 8+ (API 26+)**: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`
-- **Android 6+ (API 23+)**: `ACCESS_FINE_LOCATION`
-- **Android 5 and below**: No runtime permissions required
 
 ## ConnectManager
 
@@ -209,21 +200,6 @@ ConnectManager.INSTANCE.writeJava(data, 3000L) // 3 second timeout
     .exceptionally(throwable -> {
         Log.e("SendData", "Send error", throwable);
         return null;
-    });
-```
-
-#### Receive Data (One-time)
-
-```java
-// Read data once with timeout
-ConnectManager.INSTANCE.readJava(5000L) // 5 second timeout
-    .thenAccept(receivedData -> {
-        if (receivedData != null && receivedData.length > 0) {
-            String message = new String(receivedData, StandardCharsets.UTF_8);
-            Toast.makeText(this, "Received: " + message, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "No data received", Toast.LENGTH_SHORT).show();
-        }
     });
 ```
 
