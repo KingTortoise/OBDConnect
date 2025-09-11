@@ -5,7 +5,7 @@ A comprehensive Android library for managing Bluetooth Classic, BLE, and Wi-Fi c
 
 ## Features
 
-- **Multi-Protocol Support**: Bluetooth Classic, BLE, and Wi-Fi connections
+- **Multi-Protocol Support**: Bluetooth Classic and BLE connections
 - **Modern APIs**: CompletableFuture-based asynchronous operations
 - **Stream Subscriptions**: Real-time data flow with reactive programming
 - **Permission Management**: Automated runtime permission handling
