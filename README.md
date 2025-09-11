@@ -32,26 +32,6 @@ dependencies {
 }
 ```
 
-### 2. Required Permissions
-
-Add these permissions to your `AndroidManifest.xml`:
-
-```xml
-<!-- Basic Bluetooth permissions -->
-<uses-permission android:name="android.permission.BLUETOOTH" />
-<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
-<!-- Location permissions for BLE scanning (Android 6.0+) -->
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-<!-- New Bluetooth permissions (Android 12+) -->
-<uses-permission android:name="android.permission.BLUETOOTH_SCAN" 
-    tools:targetApi="31" />
-<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" 
-    tools:targetApi="31" />
-```
-
 ## BluetoothPermissionManager
 
 The `BluetoothPermissionManager` class handles all Bluetooth-related runtime permissions automatically based on the Android version.
