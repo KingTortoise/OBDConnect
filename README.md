@@ -1,7 +1,7 @@
 [README.md](https://github.com/user-attachments/files/22269875/README.md)
 # Bluetooth & BLE Connection Manager
 
-A comprehensive Android library for managing Bluetooth Classic, BLE, and Wi-Fi connections with friendly Java/Kotlin APIs using CompletableFuture and stream-like subscriptions.
+A comprehensive Android library for managing Bluetooth Classic and BLE connections with friendly Java/Kotlin APIs using CompletableFuture and stream-like subscriptions.
 
 ## Features
 
