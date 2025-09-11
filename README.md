@@ -1,29 +1,29 @@
-# ConnectManager 管理类 - Java & Kotlin 调用示例
+# ConnectManager Management Class - Java & Kotlin Usage Examples
 
-ConnectManager 是一个用于管理蓝牙经典和BLE连接的核心管理类，提供友好的Java和Kotlin API，支持CompletableFuture和流式订阅。
+ConnectManager is a core management class for managing Bluetooth Classic and BLE connections, providing friendly Java and Kotlin APIs with CompletableFuture and stream-like subscriptions.
 
-## 核心特性
+## Core Features
 
-- **多协议支持**: 蓝牙经典和BLE连接
-- **现代API**: 基于CompletableFuture的异步操作
-- **流式订阅**: 实时数据流和响应式编程
-- **权限管理**: 自动运行时权限处理
-- **跨平台**: 同时支持Java和Kotlin
-- **线程安全**: 所有操作都正确处理线程
+- **Multi-Protocol Support**: Bluetooth Classic and BLE connections
+- **Modern APIs**: CompletableFuture-based asynchronous operations
+- **Stream Subscriptions**: Real-time data flow and reactive programming
+- **Permission Management**: Automated runtime permission handling
+- **Cross-Platform**: Works with both Java and Kotlin
+- **Thread-Safe**: All operations properly handle threading
 
-## 包信息
+## Package Information
 
-- **包名**: `com.btBleTcp.connect`
-- **核心类**: 
-  - `ConnectManager` (Kotlin object; Java中通过 `ConnectManager.INSTANCE` 访问)
-  - `BluetoothPermissionManager` (Kotlin类)
-- **连接类型**: `ConnectType` 枚举 (`WIFI(0)`, `BT(1)`, `BLE(2)`)
+- **Package**: `com.btBleTcp.connect`
+- **Core Classes**:
+   - `ConnectManager` (Kotlin object; access via `ConnectManager.INSTANCE` from Java)
+   - `BluetoothPermissionManager` (Kotlin class)
+- **Connection Types**: `ConnectType` enum (`WIFI(0)`, `BT(1)`, `BLE(2)`)
 
-## 集成方式
+## Integration
 
-### 1. 添加库
+### 1. Add the Library
 
-将 `connect-debug.aar` 文件放在 `app/libs/` 目录下，并在 `app/build.gradle` 中添加：
+Place the `connect-debug.aar` file under `app/libs/` and add to your `app/build.gradle`:
 
 ```gradle
 dependencies {
@@ -31,531 +31,534 @@ dependencies {
 }
 ```
 
-## ConnectManager API 详解
+## ConnectManager API Details
 
-### 初始化
+### Initialization
 
-#### Java 调用示例
+#### Java Usage Example
 
 ```java
-// 初始化连接管理器
+// Initialize connection manager
 ConnectManager.INSTANCE.initManagerJava(ConnectType.BLE.getValue(), getApplicationContext())
     .thenAccept(context -> {
-        // 初始化成功
-        // context 可能为 null - 这是正常的
-        Log.d("ConnectManager", "初始化成功");
+        // Initialization successful
+        // context may be null - this is normal
+        Log.d("ConnectManager", "Initialization successful");
     })
     .exceptionally(throwable -> {
-        // 处理初始化错误
-        Log.e("ConnectManager", "初始化失败", throwable);
+        // Handle initialization error
+        Log.e("ConnectManager", "Initialization failed", throwable);
         return null;
     });
 ```
 
-#### Kotlin 调用示例
+#### Kotlin Usage Example
 
 ```kotlin
-// 初始化连接管理器
+// Initialize connection manager
 ConnectManager.initManager(ConnectType.BLE.value, applicationContext)
     .onSuccess { context ->
-        // 初始化成功
-        Log.d("ConnectManager", "初始化成功")
+        // Initialization successful
+        Log.d("ConnectManager", "Initialization successful")
     }
     .onFailure { throwable ->
-        // 处理初始化错误
-        Log.e("ConnectManager", "初始化失败", throwable)
+        // Handle initialization error
+        Log.e("ConnectManager", "Initialization failed", throwable)
     }
 ```
 
-### 设备发现
+### Device Discovery
 
-#### 开始扫描
+#### Start Scanning
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 开始设备发现
+// Start device discovery
 ConnectManager.INSTANCE.startScanJava()
     .thenAccept(unused -> {
-        // 扫描开始成功
-        Toast.makeText(this, "扫描已开始", Toast.LENGTH_SHORT).show();
+        // Scan started successfully
+        Toast.makeText(this, "Scan started", Toast.LENGTH_SHORT).show();
     })
     .exceptionally(throwable -> {
-        // 处理扫描开始错误
-        Log.e("Scan", "扫描开始失败", throwable);
+        // Handle scan start error
+        Log.e("Scan", "Scan start failed", throwable);
         return null;
     });
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 开始设备发现
+// Start device discovery
 ConnectManager.startScan()
     .onSuccess {
-        // 扫描开始成功
-        Toast.makeText(this, "扫描已开始", Toast.LENGTH_SHORT).show()
+        // Scan started successfully
+        Toast.makeText(this, "Scan started", Toast.LENGTH_SHORT).show()
     }
     .onFailure { throwable ->
-        // 处理扫描开始错误
-        Log.e("Scan", "扫描开始失败", throwable)
+        // Handle scan start error
+        Log.e("Scan", "Scan start failed", throwable)
     }
 ```
 
-#### 订阅设备流
+#### Subscribe to Device Stream
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 订阅连续设备更新
+// Subscribe to continuous device updates
 AutoCloseable deviceSubscription = ConnectManager.INSTANCE.getDeviceFlowJava(
     devices -> {
-        // 使用发现的设备更新UI
+        // Update UI with discovered devices
         Set<BluetoothDevice> deviceSet = (Set<BluetoothDevice>) devices;
         for (BluetoothDevice device : deviceSet) {
             String deviceInfo = device.getName() + " (" + device.getAddress() + ")";
-            // 添加到设备列表
+            // Add to device list
         }
     },
     error -> {
-        // 处理设备流错误
-        Log.e("DeviceStream", "设备流错误", error);
+        // Handle device stream error
+        Log.e("DeviceStream", "Device stream error", error);
     }
 );
 
-// 不要忘记关闭订阅
+// Don't forget to close subscription
 deviceSubscription.close();
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 订阅连续设备更新
+// Subscribe to continuous device updates
 val deviceFlow = ConnectManager.getDeviceFlow()
 deviceFlow.collect { devices ->
-    // 使用发现的设备更新UI
+    // Update UI with discovered devices
     devices.forEach { device ->
         val deviceInfo = "${device.name} (${device.address})"
-        // 添加到设备列表
+        // Add to device list
     }
 }
 ```
 
-### 连接管理
+### Connection Management
 
-#### 连接设备
+#### Connect to Device
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 使用设备地址（推荐）或名称连接
-String deviceAddress = "AA:BB:CC:DD:EE:FF"; // 推荐使用MAC地址
+// Connect using device address (recommended) or name
+String deviceAddress = "AA:BB:CC:DD:EE:FF"; // MAC address preferred
 ConnectManager.INSTANCE.connectJava(deviceAddress, getApplicationContext())
     .thenAccept(success -> {
         if (Boolean.TRUE.equals(success)) {
-            // 连接成功
-            Toast.makeText(this, "连接成功", Toast.LENGTH_SHORT).show();
+            // Connection successful
+            Toast.makeText(this, "Connected successfully", Toast.LENGTH_SHORT).show();
         } else {
-            // 连接失败
-            Toast.makeText(this, "连接失败", Toast.LENGTH_SHORT).show();
+            // Connection failed
+            Toast.makeText(this, "Connection failed", Toast.LENGTH_SHORT).show();
         }
     })
     .exceptionally(throwable -> {
-        // 处理连接错误
-        Log.e("Connection", "连接错误", throwable);
+        // Handle connection error
+        Log.e("Connection", "Connection error", throwable);
         return null;
     });
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 使用设备地址（推荐）或名称连接
-val deviceAddress = "AA:BB:CC:DD:EE:FF" // 推荐使用MAC地址
+// Connect using device address (recommended) or name
+val deviceAddress = "AA:BB:CC:DD:EE:FF" // MAC address preferred
 ConnectManager.connect(deviceAddress, applicationContext)
     .onSuccess { success ->
         if (success) {
-            // 连接成功
-            Toast.makeText(this, "连接成功", Toast.LENGTH_SHORT).show()
+            // Connection successful
+            Toast.makeText(this, "Connected successfully", Toast.LENGTH_SHORT).show()
         } else {
-            // 连接失败
-            Toast.makeText(this, "连接失败", Toast.LENGTH_SHORT).show()
+            // Connection failed
+            Toast.makeText(this, "Connection failed", Toast.LENGTH_SHORT).show()
         }
     }
     .onFailure { throwable ->
-        // 处理连接错误
-        Log.e("Connection", "连接错误", throwable)
+        // Handle connection error
+        Log.e("Connection", "Connection error", throwable)
     }
 ```
 
-#### 重连
+#### Reconnect
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 使用现有连接上下文重连
+// Reconnect using existing connection context
 ConnectManager.INSTANCE.reconnectJava()
     .thenAccept(success -> {
         if (Boolean.TRUE.equals(success)) {
-            Toast.makeText(this, "重连成功", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Reconnected successfully", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "重连失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Reconnection failed", Toast.LENGTH_SHORT).show();
         }
     });
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 使用现有连接上下文重连
+// Reconnect using existing connection context
 ConnectManager.reconnect()
     .onSuccess { success ->
         if (success) {
-            Toast.makeText(this, "重连成功", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Reconnected successfully", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "重连失败", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Reconnection failed", Toast.LENGTH_SHORT).show()
         }
     }
     .onFailure { throwable ->
-        Log.e("Reconnect", "重连错误", throwable)
+        Log.e("Reconnect", "Reconnection error", throwable)
     }
 ```
 
-#### 关闭连接
+#### Close Connection
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 关闭当前连接
+// Close current connection
 ConnectManager.INSTANCE.closeJava()
-    .thenAccept(unused  -> {
-        Toast.makeText(this, "连接已关闭", Toast.LENGTH_SHORT).show();
+    .thenAccept(unused -> {
+        Toast.makeText(this, "Connection closed", Toast.LENGTH_SHORT).show();
     });
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 关闭当前连接
+// Close current connection
 ConnectManager.close()
 ```
 
-### 数据通信
+### Data Communication
 
-#### 发送数据
+#### Send Data
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 发送数据（带超时）
+// Send data with timeout
 String message = "Hello, Device!\r\n";
 byte[] data = message.getBytes(StandardCharsets.UTF_8);
 
-ConnectManager.INSTANCE.writeJava(data, 3000L) // 3秒超时
+ConnectManager.INSTANCE.writeJava(data, 3000L) // 3 second timeout
     .thenAccept(success -> {
         if (Boolean.TRUE.equals(success)) {
-            Toast.makeText(this, "数据发送成功", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Data sent successfully", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "数据发送失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Data send failed", Toast.LENGTH_SHORT).show();
         }
     })
     .exceptionally(throwable -> {
-        Log.e("SendData", "发送错误", throwable);
+        Log.e("SendData", "Send error", throwable);
         return null;
     });
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 发送数据（带超时）
+// Send data with timeout
 val message = "Hello, Device!\r\n"
 val data = message.toByteArray(StandardCharsets.UTF_8)
 
-ConnectManager.write(data, 3000L) // 3秒超时
+ConnectManager.write(data, 3000L) // 3 second timeout
     .onSuccess { success ->
         if (success) {
-            Toast.makeText(this, "数据发送成功", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Data sent successfully", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "数据发送失败", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Data send failed", Toast.LENGTH_SHORT).show()
         }
     }
     .onFailure { throwable ->
-        Log.e("SendData", "发送错误", throwable)
+        Log.e("SendData", "Send error", throwable)
     }
 ```
 
-#### 订阅连续数据流
+#### Subscribe to Continuous Data Stream
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 订阅连续数据接收
+// Subscribe to continuous data reception
 AutoCloseable dataSubscription = ConnectManager.INSTANCE.receiveDataFlowJava(
     receivedData -> {
         if (receivedData != null && receivedData.length > 0) {
             String message = new String(receivedData, StandardCharsets.UTF_8);
-            // 处理接收到的数据
+            // Process received data
             runOnUiThread(() -> {
-                // 使用接收到的数据更新UI
-                textView.append("接收: " + message + "\n");
+                // Update UI with received data
+                textView.append("Received: " + message + "\n");
             });
         }
     },
     error -> {
-        Log.e("DataStream", "数据流错误", error);
+        Log.e("DataStream", "Data stream error", error);
         runOnUiThread(() -> {
-            Toast.makeText(this, "数据流错误: " + error.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Data stream error: " + error.getMessage(), Toast.LENGTH_LONG).show();
         });
     }
 );
 
-// 完成时关闭订阅
+// Close subscription when done
 dataSubscription.close();
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 订阅连续数据接收
+// Subscribe to continuous data reception
 val dataFlow = ConnectManager.receiveDataFlow()
 dataFlow.collect { receivedData ->
     if (receivedData.isNotEmpty()) {
         val message = String(receivedData, StandardCharsets.UTF_8)
-        // 处理接收到的数据
+        // Process received data
         runOnUiThread {
-            // 使用接收到的数据更新UI
-            textView.append("接收: $message\n")
+            // Update UI with received data
+            textView.append("Received: $message\n")
         }
     }
 }
 ```
 
-### BLE设备信息
+### BLE Device Information
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 获取BLE设备信息（仅BLE模式）
+// Get BLE device information (BLE mode only)
 ConnectManager.INSTANCE.getBleDeviceInfoJava()
     .thenAccept(deviceInfo -> {
         if (deviceInfo != null) {
-            // 处理设备信息
-            String info = "BLE设备信息: " + deviceInfo.toString();
-            Toast.makeText(this, "设备信息获取成功", Toast.LENGTH_SHORT).show();
+            // Process device information
+            String info = "BLE Device Info: " + deviceInfo.toString();
+            Toast.makeText(this, "Device info retrieved successfully", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "无设备信息可用", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No device info available", Toast.LENGTH_SHORT).show();
         }
     });
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 获取BLE设备信息（仅BLE模式）
+// Get BLE device information (BLE mode only)
 ConnectManager.getBleDeviceInfo()?.let { deviceInfo ->
-    // 处理设备信息
-    val info = "BLE设备信息: $deviceInfo"
-    Toast.makeText(this, "设备信息获取成功", Toast.LENGTH_SHORT).show()
+    // Process device information
+    val info = "BLE Device Info: $deviceInfo"
+    Toast.makeText(this, "Device info retrieved successfully", Toast.LENGTH_SHORT).show()
 } ?: run {
-    Toast.makeText(this, "无设备信息可用", Toast.LENGTH_SHORT).show()
+    Toast.makeText(this, "No device info available", Toast.LENGTH_SHORT).show()
 }
 ```
-### BLE特征值操作
 
-BLE特征值操作是BLE连接中的重要功能，用于配置设备的读写特征值和通知描述符。
+### BLE Characteristic Operations
 
-#### CharacteristicProperty 枚举类
+BLE characteristic operations are important functions in BLE connections, used to configure device read/write characteristics and notification descriptors.
 
-`CharacteristicProperty` 枚举类定义了常见的BLE特征属性，提供了类型安全的属性管理方式。
+#### CharacteristicProperty Enum Class
+
+The `CharacteristicProperty` enum class defines common BLE characteristic properties, providing type-safe property management.
 
 ```
-CharacteristicProperty.READ              // 读属性 (0x02)
-CharacteristicProperty.WRITE             // 写属性 (0x08)  
-CharacteristicProperty.NOTIFY            // 通知属性 (0x10)
-CharacteristicProperty.INDICATE          // 指示属性 (0x20)
-CharacteristicProperty.WRITE_WITHOUT_RESPONSE // 无响应写属性 (0x04)
+CharacteristicProperty.READ              // Read property (0x02)
+CharacteristicProperty.WRITE             // Write property (0x08)  
+CharacteristicProperty.NOTIFY            // Notify property (0x10)
+CharacteristicProperty.INDICATE          // Indicate property (0x20)
+CharacteristicProperty.WRITE_WITHOUT_RESPONSE // Write without response property (0x04)
 ```
-**实用方法:**
+
+**Utility Methods:**
 
 ```java
-// Java 使用示例
-// 根据属性值获取枚举列表
+// Java usage example
+// Get enum list from property value
 List<CharacteristicProperty> properties = CharacteristicProperty.fromPropertyValue(characteristic.getProperties());
 
-// 根据显示名称获取枚举
+// Get enum from display name
 CharacteristicProperty property = CharacteristicProperty.fromDisplayName("WRITE");
 
-// 获取显示名称
+// Get display name
 String displayName = CharacteristicProperty.WRITE.getDisplayName(); // "WRITE"
 
-// 转换为显示名称列表
+// Convert to display name list
 List<String> names = CharacteristicProperty.toDisplayNames(properties);
 ```
 
 ```kotlin
-// Kotlin 使用示例
-// 根据属性值获取枚举列表
+// Kotlin usage example
+// Get enum list from property value
 val properties = CharacteristicProperty.fromPropertyValue(characteristic.properties)
 
-// 根据显示名称获取枚举
+// Get enum from display name
 val property = CharacteristicProperty.fromDisplayName("WRITE")
 
-// 获取显示名称
+// Get display name
 val displayName = CharacteristicProperty.WRITE.displayName // "WRITE"
 
-// 转换为显示名称列表
+// Convert to display name list
 val names = CharacteristicProperty.toDisplayNames(properties)
 ```
 
-#### 修改BLE写入特征值
+#### Modify BLE Write Characteristic
 
-用于配置BLE设备的写入特征值，控制数据发送功能。
+Used to configure BLE device write characteristics, controlling data transmission functionality.
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 修改BLE写入特征值（仅BLE模式）
-String characteristicUuid = "0000FFE1-0000-1000-8000-00805F9B34FB"; // 特征值UUID
-String typeName = CharacteristicProperty.WRITE.getDisplayName(); // 类型名称
-boolean enable = true; // 启用或禁用
+// Modify BLE write characteristic (BLE mode only)
+String characteristicUuid = "0000FFE1-0000-1000-8000-00805F9B34FB"; // Characteristic UUID
+String typeName = CharacteristicProperty.WRITE.getDisplayName(); // Type name
+boolean enable = true; // Enable or disable
 
 ConnectManager.INSTANCE.onChangeBleWriteInfoJava(characteristicUuid, typeName, enable)
     .thenAccept(unused -> {
-        Toast.makeText(this, "BLE写入特征值修改成功", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "BLE write characteristic modified successfully", Toast.LENGTH_SHORT).show();
     })
     .exceptionally(throwable -> {
-        Log.e("BLE", "修改写入特征值失败", throwable);
+        Log.e("BLE", "Failed to modify write characteristic", throwable);
         runOnUiThread(() -> {
-            Toast.makeText(this, "修改失败: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Modification failed: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
         });
         return null;
     });
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 修改BLE写入特征值（仅BLE模式）
-val characteristicUuid = "0000FFE1-0000-1000-8000-00805F9B34FB" // 特征值UUID
-val typeName = CharacteristicProperty.WRITE.displayName // 类型名称
-val enable = true // 启用或禁用
+// Modify BLE write characteristic (BLE mode only)
+val characteristicUuid = "0000FFE1-0000-1000-8000-00805F9B34FB" // Characteristic UUID
+val typeName = CharacteristicProperty.WRITE.displayName // Type name
+val enable = true // Enable or disable
 
 ConnectManager.onChangeBleWriteInfo(characteristicUuid, typeName, enable)
-// 注意：Kotlin版本直接调用，没有返回值
+// Note: Kotlin version calls directly, no return value
 ```
 
-#### 修改BLE描述符
+#### Modify BLE Descriptor
 
-用于配置BLE设备的通知描述符，控制数据接收功能。
+Used to configure BLE device notification descriptors, controlling data reception functionality.
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 修改BLE描述符（仅BLE模式）
-String descriptorUuid = "00002902-0000-1000-8000-00805F9B34FB"; // 描述符UUID
-String typeName = CharacteristicProperty.NOTIFY.getDisplayName(); // 类型名称
-boolean enable = true; // 启用或禁用
+// Modify BLE descriptor (BLE mode only)
+String descriptorUuid = "00002902-0000-1000-8000-00805F9B34FB"; // Descriptor UUID
+String typeName = CharacteristicProperty.NOTIFY.getDisplayName(); // Type name
+boolean enable = true; // Enable or disable
 
 ConnectManager.INSTANCE.onChangeBleDescriptorInfoJava(descriptorUuid, typeName, enable)
     .thenAccept(unused -> {
-        Toast.makeText(this, "BLE描述符修改成功", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "BLE descriptor modified successfully", Toast.LENGTH_SHORT).show();
     })
     .exceptionally(throwable -> {
-        Log.e("BLE", "修改描述符失败", throwable);
+        Log.e("BLE", "Failed to modify descriptor", throwable);
         runOnUiThread(() -> {
-            Toast.makeText(this, "修改失败: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Modification failed: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
         });
         return null;
     });
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 修改BLE描述符（仅BLE模式）
-val descriptorUuid = "00002902-0000-1000-8000-00805F9B34FB" // 描述符UUID
-val typeName = CharacteristicProperty.NOTIFY.displayName // 类型名称
-val enable = true // 启用或禁用
+// Modify BLE descriptor (BLE mode only)
+val descriptorUuid = "00002902-0000-1000-8000-00805F9B34FB" // Descriptor UUID
+val typeName = CharacteristicProperty.NOTIFY.displayName // Type name
+val enable = true // Enable or disable
 
 ConnectManager.onChangeBleDescriptorInfo(descriptorUuid, typeName, enable)
-// 注意：Kotlin版本直接调用，没有返回值
+// Note: Kotlin version calls directly, no return value
 ```
 
-#### BLE特征值操作注意事项
+#### BLE Characteristic Operation Notes
 
-1. **仅BLE模式有效**: 这些方法只在BLE连接模式下有效，其他连接类型调用会被忽略
-2. **UUID格式**: 确保使用正确的UUID格式，通常是128位标准格式
-3. **调用时机**: 建议在连接成功后立即配置特征值，确保后续数据通信正常
-4. **错误处理**: Java版本需要处理可能的异常，Kotlin版本直接调用
-5. **类型安全**: 推荐使用`CharacteristicProperty`枚举而不是硬编码字符串，提供类型安全和IDE支持
+1. **BLE mode only**: These methods are only effective in BLE connection mode, other connection types will be ignored
+2. **UUID format**: Ensure correct UUID format
+3. **Call timing**: Recommend configuring characteristics immediately after successful connection to ensure normal subsequent data communication
+4. **Error handling**: Java version needs to handle possible exceptions, Kotlin version calls directly
+5. **Type safety**: Recommend using `CharacteristicProperty` enum instead of hardcoded strings, providing type safety and IDE support
 
-### 全局回调
+### Global Callbacks
 
-**Java 调用示例:**
+**Java Usage Example:**
 
 ```java
-// 设置设备断开连接回调
+// Set device disconnect callback
 ConnectManager.INSTANCE.setOnDeviceDisconnect(() -> {
     runOnUiThread(() -> {
-        Toast.makeText(this, "设备已断开连接", Toast.LENGTH_SHORT).show();
-        // 处理设备断开逻辑
+        Toast.makeText(this, "Device disconnected", Toast.LENGTH_SHORT).show();
+        // Handle device disconnect logic
     });
 });
 
-// 设置蓝牙断开连接回调
+// Set Bluetooth disconnect callback
 ConnectManager.INSTANCE.setOnBluetoothDisconnect(() -> {
     runOnUiThread(() -> {
-        Toast.makeText(this, "蓝牙已断开", Toast.LENGTH_SHORT).show();
-        // 处理蓝牙断开逻辑
+        Toast.makeText(this, "Bluetooth disconnected", Toast.LENGTH_SHORT).show();
+        // Handle Bluetooth disconnect logic
     });
 });
 
-// 设置RSSI更新回调
+// Set RSSI update callback
 ConnectManager.INSTANCE.setOnHandleRssiUpdate(rssi -> {
     runOnUiThread(() -> {
-        // 更新RSSI显示
-        textView.setText("信号强度: " + rssi + " dBm");
+        // Update RSSI display
+        textView.setText("Signal strength: " + rssi + " dBm");
     });
 });
 ```
 
-**Kotlin 调用示例:**
+**Kotlin Usage Example:**
 
 ```kotlin
-// 设置设备断开连接回调
+// Set device disconnect callback
 ConnectManager.onDeviceDisconnect = {
     runOnUiThread {
-        Toast.makeText(this, "设备已断开连接", Toast.LENGTH_SHORT).show()
-        // 处理设备断开逻辑
+        Toast.makeText(this, "Device disconnected", Toast.LENGTH_SHORT).show()
+        // Handle device disconnect logic
     }
 }
 
-// 设置蓝牙断开连接回调
+// Set Bluetooth disconnect callback
 ConnectManager.onBluetoothDisconnect = {
     runOnUiThread {
-        Toast.makeText(this, "蓝牙已断开", Toast.LENGTH_SHORT).show()
-        // 处理蓝牙断开逻辑
+        Toast.makeText(this, "Bluetooth disconnected", Toast.LENGTH_SHORT).show()
+        // Handle Bluetooth disconnect logic
     }
 }
 
-// 设置RSSI更新回调
+// Set RSSI update callback
 ConnectManager.onHandleRssiUpdate = { rssi ->
     runOnUiThread {
-        // 更新RSSI显示
-        textView.text = "信号强度: $rssi dBm"
+        // Update RSSI display
+        textView.text = "Signal strength: $rssi dBm"
     }
 }
 ```
-## 最佳实践
 
-1. **始终在 `onDestroy()` 中关闭订阅**或不再需要时
-2. **使用MAC地址**而不是设备名称进行连接
-3. **处理设备信息方法中的null值**
-4. **添加超时**以防止挂起操作
-5. **在不同Android版本上测试权限流程**
-6. **对所有异步操作使用适当的错误处理**
+## Best Practices
 
-## 支持
+1. **Always close subscriptions** in `onDestroy()` or when no longer needed
+2. **Use MAC addresses** instead of device names for connections
+3. **Handle null values** from device information methods
+4. **Add timeouts** to prevent hanging operations
+5. **Test permission flows** on different Android versions
+6. **Use proper error handling** for all async operations
 
-如有问题和疑问，请参考库文档或联系开发团队。
+## Support
+
+For issues and questions, please refer to the library documentation or contact the development team.
